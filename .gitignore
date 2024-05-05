@@ -1,0 +1,8 @@
+# Files to be ignored
+
+__pycache__/
+.env
+*.__pycache__
+.DS_Store
+/static/
+/media/
