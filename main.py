@@ -56,22 +56,17 @@ class User:
 class ZodiacCompatibility:
 
     def __init__(self):
-        self.api_url = os.getenv(
-            "PRODUCTION_ENDPOINT",
-            "https://us-central1-tf-natal.cloudfunctions.net/horoscopeapi_test",
-        )
+        self.api_url = os.getenv("PRODUCTION_ENDPOINT")
         self.headers = {
-            "Authorization": f"Bearer {os.getenv('TWIN_FLAME_API', 'Your_Fallback_API_Key')}"
+            "Authorization": f"Bearer {os.getenv('TWIN_FLAME_API')}",
+            "Content-Type": "application/json",
         }
-
-        print("API URL:", self.api_url)  # Debugging output
-        print("Headers:", self.headers)  # Debugging output
 
     def fetch_compatibility(self, sign, day="today"):
         """Fetch the zodiac compatibility information from the Aztro API."""
-        data = {"sign": sign, "day": day}
+        data = {"sign": sign, "date": day}
         try:
-            response = requests.post(self.api_url, headers=self.headers, data=data)
+            response = requests.post(self.api_url, headers=self.headers, json=data)
             response.raise_for_status()  # Raises a HTTPError for bad requests (4XX or 5XX)
             return response.json()  # Return the parsed JSON data
         except requests.exceptions.HTTPError as e:
@@ -79,6 +74,21 @@ class ZodiacCompatibility:
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")  # General error catching
         return None
+
+    def format_compatibility_data(data):
+        """Format the compatibility data into a readable string."""
+        if not data:
+            return "No data available."
+
+        # Extracting and formatting the compatibility data
+        details = [
+            f"Date: {data.get('current_date')}",
+            f"Compatibility: {data.get('compatibility')}",
+            f"Lucky Time: {data.get('lucky_time')}",
+            f"Lucky Number: {data.get('lucky_number')}",
+            f"Description: {data.get('description')}",
+        ]
+        return "\n".join(details)
 
 
 class Emailer:
@@ -141,7 +151,10 @@ def main():
     if not compatibility_data:
         print("Failed to fetch compatibility data")
         sys.exit(1)
+    print("Compatibility Result:", result)
 
 
 if __name__ == "__main__":
-    main()
+    zc = ZodiacCompatibility()
+    result = zc.fetch_compatibility("Gemini")
+    print("Compatibility Result:", result)
