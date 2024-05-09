@@ -54,7 +54,31 @@ class User:
 
 
 class ZodiacCompatibility:
-    pass
+
+    def __init__(self):
+        self.api_url = os.getenv(
+            "PRODUCTION_ENDPOINT",
+            "https://us-central1-tf-natal.cloudfunctions.net/horoscopeapi_test",
+        )
+        self.headers = {
+            "Authorization": f"Bearer {os.getenv('TWIN_FLAME_API', 'Your_Fallback_API_Key')}"
+        }
+
+        print("API URL:", self.api_url)  # Debugging output
+        print("Headers:", self.headers)  # Debugging output
+
+    def fetch_compatibility(self, sign, day="today"):
+        """Fetch the zodiac compatibility information from the Aztro API."""
+        data = {"sign": sign, "day": day}
+        try:
+            response = requests.post(self.api_url, headers=self.headers, data=data)
+            response.raise_for_status()  # Raises a HTTPError for bad requests (4XX or 5XX)
+            return response.json()  # Return the parsed JSON data
+        except requests.exceptions.HTTPError as e:
+            print(f"HTTP error occurred: {e}")  # Print HTTP error message
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")  # General error catching
+        return None
 
 
 class Emailer:
@@ -106,23 +130,17 @@ class Emailer:
 
 def main():
     # 2CLI: Email + starsign
-    emailer = Emailer()
-    while True:
-        receiver_email = "seanlenny69@gmail.com"
-        subject = "Test Email from Zodiac Compatibility App"
-        content = "This is a test email to verify configuration."
-        user = User(receiver_email)
-        if user.validate_email():
-            print("Valid email address")
-            break
-        else:
-            print("Invalid input. Please enter a valid email address.")
+    if len(sys.argv) != 3:
+        print("Usage: python3 script.py <email> <sign>")
+        sys.exit(1)  # Exit the program indicating incorrect usage
 
-    try:
-        emailer.send_email(receiver_email, subject, content)
-        print("Email sent successfully!")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    receiver_email = sys.argv[1]
+    sign = sys.argv[2]
+    zc = ZodiacCompatibility()
+    compatibility_data = zc.fetch_compatibility(sign)
+    if not compatibility_data:
+        print("Failed to fetch compatibility data")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
