@@ -1,20 +1,15 @@
 # Zodiac API Emailer
-import requests
-
-# Import necessary libraries
-from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
-
 import sys
+import requests
 import re
-
-# Import other modules or classes after loading the environment variables
+from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class User:
@@ -44,13 +39,6 @@ class User:
         if re.match(r"[^@]+@[^@]+\.[^@]+", self.email):
             return True
         return False
-
-    # def validate_zodiac(self):
-    #     # Zodiac verification
-    #     return self.zodiac in User.valid_zodiac_signs
-
-    # def is_valid(self):
-    #     return self.validate_email() and self.validate_zodiac()
 
 
 class ZodiacCompatibility:
@@ -102,6 +90,7 @@ class ZodiacCompatibility:
             print(f"Error fetching data: {e}")  # General error catching
         return None
 
+    @staticmethod
     def format_compatibility_data(data):
         """Format the compatibility data into a readable string."""
         if not data:
@@ -121,16 +110,19 @@ class ZodiacCompatibility:
 class Emailer:
     # Email preparation
     def __init__(self):
-        self.sender_email = os.getenv("EMAIL")
-        self.sender_password = os.getenv("PASSWORD")
+        self.sender_email = os.getenv("SENDER_EMAIL")
+        self.sender_password = os.getenv("SENDER_PASSWORD")
 
     def send_email(self, receiver_email, subject, content):
-        # Prepare the email content
+        formatted_content = content.replace("\n", "<br>")
+
+        """Prepare and send an email."""
         html = f"""
         <html>
         <body>
             <p>Hi,<br>
-            This is a test Email
+            This is your Daily Horoscope and Compatibility Result:<br>
+            {formatted_content}
             </p>
         </body>
         </html>
@@ -173,15 +165,26 @@ def main():
 
     receiver_email = sys.argv[1]
     sign = sys.argv[2]
+
+    user = User(receiver_email)
+    if not user.validate_email():
+        print("Invalid email provided.")
+        sys.exit(1)
+
     zc = ZodiacCompatibility()
     compatibility_data = zc.fetch_compatibility(sign)
-    if not compatibility_data:
-        print("Failed to fetch compatibility data")
-        sys.exit(1)
-    print("Compatibility Result:", result)
+    if compatibility_data:
+        formatted_data = ZodiacCompatibility.format_compatibility_data(
+            compatibility_data
+        )
+
+        # Initialize Emailer and send the email
+        emailer = Emailer()
+        subject = f"Your Daily Horoscope and Compatibility for {sign}"
+        emailer.send_email(receiver_email, subject, formatted_data)
+    else:
+        print("Failed to fetch compatibility data.")
 
 
 if __name__ == "__main__":
-    zc = ZodiacCompatibility()
-    result = zc.fetch_compatibility("Gemini")
-    print("Compatibility Result:", result)
+    main()
