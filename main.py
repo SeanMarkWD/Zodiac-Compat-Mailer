@@ -54,13 +54,40 @@ class User:
 
 
 class ZodiacCompatibility:
-
     def __init__(self):
+        self._api_url = None
+        self._api_key = None
+        self.load_configuration()
+
+    def load_configuration(self):
+        """Load and set the configuration from environment variables."""
         self.api_url = os.getenv("PRODUCTION_ENDPOINT")
         self.headers = {
             "Authorization": f"Bearer {os.getenv('TWIN_FLAME_API')}",
             "Content-Type": "application/json",
         }
+
+    @property
+    def api_url(self):
+        """Get the API URL."""
+        return self._api_url
+
+    @api_url.setter
+    def api_url(self, value):
+        if not value:
+            raise ValueError("PRODUCTION_ENDPOINT environment variable is missing.")
+        self._api_url = value
+
+    @property
+    def api_key(self):
+        """Get the API Key."""
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, value):
+        if not value:
+            raise ValueError("TWIN_FLAME_API environment variable is missing.")
+        return self._api_key
 
     def fetch_compatibility(self, sign, day="today"):
         """Fetch the zodiac compatibility information from the Aztro API."""
