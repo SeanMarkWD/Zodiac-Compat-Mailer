@@ -1,0 +1,38 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Zodiac Compatibility Emailer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Zodiac Compatibility Emailer</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('send_email') }}" method="POST">
+            <label for="email">Your Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="zodiac">Your Zodiac Sign:</label>
+            <select id="zodiac" name="zodiac" required>
+                <option value="">Select Your Sign</option>
+                {% for sign in valid_zodiac_signs %}
+                <option value="{{ sign }}">{{ sign }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Send My Horoscope</button>
+        </form>
+    </div>
+</body>
+
+</html>
