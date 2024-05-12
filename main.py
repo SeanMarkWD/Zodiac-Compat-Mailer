@@ -30,7 +30,6 @@ class User:
 
     def __init__(self, email):
         self.email = email
-        # self.zodiac = zodiac
 
     def validate_email(self):
         # Validates if a user input email address is valid

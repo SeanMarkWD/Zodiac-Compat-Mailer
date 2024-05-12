@@ -27,3 +27,22 @@ def test_load_configuration():
         zodiac = ZodiacCompatibility()
         assert zodiac.api_url == "http://api.example.com"
         assert zodiac.headers["Authorization"] == "Bearer secret_api_key"
+
+
+def test_format_compatibility_data():
+    data = {
+        "current_date": "2024-05-12",
+        "compatibility": "Good",
+        "lucky_time": "2 PM",
+        "lucky_number": "8",
+        "description": "A good day!",
+    }
+    formatted = ZodiacCompatibility.format_compatibility_data(data)
+    expected_format = (
+        "Date: 2024-05-12\n"
+        "Compatibility: Good\n"
+        "Lucky Time: 2 PM\n"
+        "Lucky Number: 8\n"
+        "Description: A good day!"
+    )
+    assert formatted == expected_format

@@ -6,4 +6,5 @@ __pycache__/
 .DS_Store
 /static/
 /media/
+/tests/
 /slenfe-WD.1.4.4/
