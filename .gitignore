@@ -7,4 +7,5 @@ __pycache__/
 /static/
 /media/
 /tests/
+test_app.py
 /slenfe-WD.1.4.4/
